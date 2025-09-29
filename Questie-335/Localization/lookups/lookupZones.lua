@@ -2,8 +2,8 @@
 local l10n = QuestieLoader:ImportModule("l10n")
 
 l10n.continentLookup = {
-    [1] = "Eastern Kingdoms",
-    [2] = "Kalimdor",
+    [1] = "Kalimdor",
+    [2] = "Eastern Kingdoms",
     [3] = "Outland",
     [4] = "Northrend",
     [5] = "Dungeons",
@@ -12,9 +12,10 @@ l10n.continentLookup = {
     [8] = "Professions",
     [9] = "Events",
 }
-
+ --table = { [instanceId] = { [MapAreaId]="Zone Text" } }
 -- Table was generated with the ExternalScripts(DONOTINCLUDEINRELEASE)/getAreaRelations.py script
 l10n.zoneLookup = {
+        -- Eastern Kingdoms
     [0]={
         [1]="Dun Morogh",
         [2]="Longshore",
@@ -28,7 +29,6 @@ l10n.zoneLookup = {
         [12]="Elwynn Forest",
         [13]="The World Tree",
         [18]="Crystal Lake",
-        [19]="Zul'Gurub",
         [20]="Moonbrook",
         [21]="Kul Tiras",
         [23]="Northshire River",
@@ -423,7 +423,6 @@ l10n.zoneLookup = {
         [1957]="Blackchar Cave",
         [1958]="Tanner Camp",
         [1959]="Dustfire Valley",
-        --[1977]="Zul'Gurub",
         [1978]="Misty Reed Post",
         [2037]="Quel'thalas",
         [2098]="Dawning Wood Catacombs",
@@ -585,7 +584,6 @@ l10n.zoneLookup = {
         [3664]="Huntress of the Sun",
         [3665]="Falconwing Square",
         [3704]="The Shepherd's Gate",
-        --[3805]="Zul'Aman",
         [3823]="Isle of Tribulations",
         [3856]="Elrendar Crossing",
         [3861]="Thalassian Pass",
@@ -594,7 +592,6 @@ l10n.zoneLookup = {
         [3913]="Runestone Falithas",
         [3914]="Runestone Shan'dor",
         [4067]="Plaguewood Tower",
-        --[4075]="Sunwell Plateau",
         [4080]="Isle of Quel'Danas",
         [4081]="The Dawnchaser",
         [4082]="The Sin'loren",
@@ -650,6 +647,7 @@ l10n.zoneLookup = {
         [4668]="The Cooper Residence",
         [4679]="The Forlorn Cavern",
     },
+    -- Kalimdor
     [1]={
         [14]="Durotar",
         [15]="Dustwallow Marsh",
@@ -919,7 +917,6 @@ l10n.zoneLookup = {
         [1137]="Lower Wilds",
         [1156]="Southern Barrens",
         [1157]="Southern Gold Road",
-        --[1176]="Zul'Farrak",
         [1216]="Timbermaw Hold",
         [1217]="Vanndir Encampment",
         [1218]="TESTAzshara",
@@ -1031,7 +1028,6 @@ l10n.zoneLookup = {
         [2254]="Ban'Thallow Barrow Den",
         [2255]="Everlook",
         [2256]="Darkwhisper Gorge",
-        [2300]="Caverns of Time",
         [2301]="Thistlefur Village",
         [2302]="The Quagmire",
         [2303]="Windbreak Canyon",
@@ -1053,20 +1049,6 @@ l10n.zoneLookup = {
         [2361]="Nighthaven",
         [2362]="Shrine of Remulos",
         [2363]="Stormrage Barrow Dens",
-        [2366]="The Black Morass",
-        [2367]="Old Hillsbrad Foothills",
-        [2368]="Tarren Mill",
-        [2369]="Southshore",
-        [2370]="Durnholde Keep",
-        [2371]="Dun Garok",
-        [2372]="Hillsbrad Fields",
-        [2373]="Eastern Strand",
-        [2374]="Nethander Stead",
-        [2375]="Darrow Hill",
-        [2376]="Southpoint Tower",
-        [2377]="Thoradin's Wall",
-        [2378]="Western Strand",
-        [2379]="Azurelode Mine",
         [2404]="Tethris Aran",
         [2405]="Ethel Rethor",
         [2406]="Ranazjar Isle",
@@ -1128,7 +1110,6 @@ l10n.zoneLookup = {
         [3425]="Cenarion Hold",
         [3426]="Staghelm Point",
         [3427]="Bronzebeard Encampment",
-        --[3429]="Ruins of Ahn'Qiraj",
         [3440]="Scarab Terrace",
         [3441]="General's Terrace",
         [3442]="The Reservoir",
@@ -1196,7 +1177,6 @@ l10n.zoneLookup = {
         [3602]="Kessel's Crossing",
         [3603]="Tel'athion's Camp",
         [3604]="The Bloodcursed Reef",
-        --[3606]="Hyjal Summit",
         [3608]="Vindicator's Rest",
         [3612]="Bloodcurse Isle",
         [3639]="Silvermyst Isle",
@@ -1218,7 +1198,6 @@ l10n.zoneLookup = {
         [4046]="Direhorn Post",
         [4047]="Nat's Landing",
         [4049]="Tabetha's Farm",
-        --[4100]="The Culling of Stratholme",
         [4381]="Waygate",
         [4382]="The Shaper's Terrace",
     },
@@ -1312,6 +1291,10 @@ l10n.zoneLookup = {
     },
     [242] = {
         [1585]="Blackrock Depths",
+    },
+    [269] = {
+        [2366]="The Black Morass",
+        [2367]="Old Hillsbrad Foothills",
     },
     [289]={
         [2057]="Scholomance",
@@ -1741,6 +1724,9 @@ l10n.zoneLookup = {
     [533]={
         [3456]="Naxxramas",
     },
+    [534]={
+        [3606]="Hyjal Summit",
+    },
     [540]={
         [3535]="Hellfire Citadel",
         [3714]="The Shattered Halls",
@@ -1793,9 +1779,6 @@ l10n.zoneLookup = {
     },
     [559]={
         [3698]="Nagrand Arena",
-    },
-    [560]={
-        [3605]="Hyjal Past",
     },
     [562]={
         [3702]="Blade's Edge Arena",
@@ -2412,6 +2395,9 @@ l10n.zoneLookup = {
     [585]={
         [4131]="Magisters' Terrace",
     },
+    [595]={
+        [4100]="The Culling of Stratholme",
+    },
     [598]={
         [4076]="Reuse Me 7",
     },
@@ -2580,15 +2566,13 @@ l10n.zoneCategoryLookup = {
         [1584] = "Blackrock Depths",
         [1585] = "Blackrock Depths",
         [1941] = "Caverns of Time",
-        [1977]="Zul'Gurub",
+        [1977] = "Zul'Gurub",
         [2017] = "Stratholme",
         [2057] = "Scholomance",
         [2100] = "Maraudon",
-        [2366] = "The Black Morass",
-        [2367] = "Old Hillsbrad Foothills",
         [2437] = "Ragefire Chasm",
         [2557] = "Dire Maul",
-        [3429]="Ruins of Ahn'Qiraj",
+        [3429] = "Ruins of Ahn'Qiraj",
         [3456] = "Naxxramas",
         [3457] = "Karazhan",
         [3477] = "Azjol-Nerub",
@@ -2603,16 +2587,16 @@ l10n.zoneCategoryLookup = {
         [3790] = "Auchenai Crypts",
         [3791] = "Sethekk Halls",
         [3792] = "Mana-Tombs",
-        [3805]="Zul'Aman",
+        [3805] = "Zul'Aman",
         [3842] = "Tempest Keep",
         [3847] = "The Botanica",
         [3848] = "The Arcatraz",
         [3849] = "The Mechanar",
         [3789] = "Shadow Labyrinth",
         [3905] = "Coilfang Reservoir",
-        [3917]="Auchindoun",
-        [3959]="Black Temple",
-        [4075]="Sunwell Plateau",
+        [3917] = "Auchindoun",
+        [3959] = "Black Temple",
+        [4075] = "Sunwell Plateau",
         [4100] = "The Culling of Stratholme",
         [4120] = "The Nexus",
         [4196] = "Drak'Tharon Keep",
@@ -2621,13 +2605,13 @@ l10n.zoneCategoryLookup = {
         [4272] = "Halls of Lightning",
         [4375] = "Gundrak",
         [4415] = "The Violet Hold",
-        [4416]="Gundrak",
+        [4416] = "Gundrak",
         [4493] = "The Obsidian Sanctum",
         [4494] = "Ahn'kahet",
         [4500] = "The Eye of Eternity",
         [4812] = "Icecrown Citadel",
-        [4813]="Pit of Saron",
-        [4987]="The Ruby Sanctum",
+        [4813] = "Pit of Saron",
+        [4987] = "The Ruby Sanctum",
     },
     [6] = {
         [-25] = "Battlegrounds",

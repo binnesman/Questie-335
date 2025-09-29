@@ -34,8 +34,8 @@ local notesPopupWin
 local notesPopupWinIsOpen = false
 
 QuestieJourney.questCategoryKeys = {
-    EASTERN_KINGDOMS = 1,
-    KALIMDOR = 2,
+    KALIMDOR = 1,
+    EASTERN_KINGDOMS = 2,
     OUTLAND = 3,
     NORTHREND = 4,
     DUNGEONS = 5,

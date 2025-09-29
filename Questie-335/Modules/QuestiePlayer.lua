@@ -104,8 +104,17 @@ function QuestiePlayer.HasRequiredClass(requiredClasses)
 end
 
 function QuestiePlayer:GetCurrentZoneId()
+    
     local uiMapId = C_Map.GetBestMapForUnit("player")
     if uiMapId then
+        Questie:Print("uiMapId "..uiMapId)
+        local zone = Custom_GetCurrentZone()
+        if ZoneDB.IsDungeonZone(zone) then
+            Questie:Print("Zone "..zone.." is dungeon")
+            --uiMapId = zone
+            return zone
+        end
+        Questie:Print("uiMapId "..uiMapId)
         return ZoneDB:GetAreaIdByUiMapId(uiMapId)
     end
 
@@ -118,11 +127,17 @@ function QuestiePlayer:GetCurrentContinentId()
     if (not currentZoneId) or currentZoneId == 0 then
         return 1 -- Default to Eastern Kingdom
     end
+    if currentZoneId == 1941 then
+        return 269;
+    end
 
-    local currentContinentId = 1 -- Default to Eastern Kingdom
+    Questie:Print("Searching for currentZoneId: "..currentZoneId)
+    local currentContinentId = 1 -- Default to Dungeon
     for cId, cont in pairs(l10n.zoneLookup) do
         for id, _ in pairs(cont) do
             if id == currentZoneId then
+                Questie:Print("Found matching id with currentZoneId: "..currentZoneId)
+                Questie:Print("Matching continentId: "..cId)
                 currentContinentId = cId
             end
         end

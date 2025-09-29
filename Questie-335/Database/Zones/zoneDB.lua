@@ -37,7 +37,21 @@ ZoneDB.zoneIDs = ZoneDB.private.zoneIDs or {}
 
 -- Overrides for UiMapId to AreaId
 local UiMapIdOverrides = {
-    [246] = 3713
+    [246] = 3713,
+    [2366] = 273,
+    [2367] = 274,
+    [2368] = 274,
+    [2369] = 274,
+    [2370] = 274,
+    [2371] = 274,
+    [2372] = 274,
+    [2373] = 274,
+    [2374] = 274,
+    [2375] = 274,
+    [2376] = 274,
+    [2377] = 274,
+    [2378] = 274,
+    [2379] = 274,
 }
 local parentZoneToSubZone = {} -- Generated
 local zoneMap = {} -- Generated
@@ -81,6 +95,7 @@ function ZoneDB:GetAreaIdByUiMapId(uiMapId)
     -- First we look for a direct match
     for AreaUiMapId, lAreaId in pairs(uiMapIdToAreaId) do
         local areaId = lAreaId
+        --Questie:Print("AreaUiMapId "..AreaUiMapId)
         if (AreaUiMapId == uiMapId and not foundId) then
             --Questie:Debug(Questie.DEBUG_DEVELOP, "[ZoneDB:GetAreaIdByUiMapId] : ", " AreaUiMapId: ", AreaUiMapId, " ==  uiMapId: ", uiMapId, " and areaId = ", areaId, " foundID is nil")
             foundId = areaId
@@ -113,7 +128,14 @@ function ZoneDB:GetAreaIdByUiMapId(uiMapId)
                 return areaId
             end
         end
-        error("No AreaId found for UiMapId: " .. uiMapId .. ":" .. C_Map.GetMapInfo(uiMapId).name)
+        --local zone = Custom_GetCurrentZone()
+        --if ZoneDB.IsDungeonZone(zone) then
+            --Questie:Print("Found dungeon zone: "..zone)
+            --return zone
+        --end
+
+        --error("No AreaId found for UiMapId: " .. uiMapId .. ":" .. C_Map.GetMapInfo(uiMapId).name)
+        --return 4395 -- Dalaran
     end
 end
 
