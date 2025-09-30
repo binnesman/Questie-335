@@ -592,7 +592,7 @@ function QuestieCompat.GetQuestsCompleted()
         Questie.db.char.complete = {}
     end
 
-    print(Questie:Colorize("[Questie] Beginning Quest Completion Query", "yellow"))
+    --print(Questie:Colorize("[Questie] Beginning Quest Completion Query", "yellow"))
     QueryQuestsCompleted()
     return Questie.db.char.complete
 end

@@ -99,7 +99,7 @@ _CreateContinentDropdown = function()
         selectedContinentId = _QuestieJourney.lastZoneSelection[1]
     end
 
-    Questie:Print("Setting continent to "..selectedContinentId)
+    --Questie:Print("Setting continent to "..selectedContinentId)
     dropdown:SetValue(selectedContinentId)
     return dropdown
 end
@@ -113,12 +113,12 @@ _CreateZoneDropdown = function()
         currentZoneId = _QuestieJourney.lastZoneSelection[2]
     end
 
-    Questie:Print("SelectedContinentId: "..selectedContinentId)
-    Questie:Print("currentZoneId: "..currentZoneId)
+    --Questie:Print("SelectedContinentId: "..selectedContinentId)
+    --Questie:Print("currentZoneId: "..currentZoneId)
 
     local zones = QuestieJourney.zones[selectedContinentId]
     if currentZoneId and currentZoneId > 0 and zones then
-        Questie:Print("currentZoneId is valid, zones is valid, and currentZoneId is greater than 0")
+        --Questie:Print("currentZoneId is valid, zones is valid, and currentZoneId is greater than 0")
         local sortedZones = QuestieJourneyUtils:GetSortedZoneKeys(zones)
         --for _,zoneI in pairs(zones) do
             --Questie:Print("Zone "..zoneI)
