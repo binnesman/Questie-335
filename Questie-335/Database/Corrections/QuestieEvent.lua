@@ -78,7 +78,7 @@ local DMF_LOCATIONS = {
     ELWYNN_FOREST = 2,
 }
 
-function QuestieEvent:Load()
+function QuestieEvent:Load()    
     local activeEvents = {}
     local currentDate = C_DateAndTime.GetCurrentCalendarTime()["monthDay"]
     
@@ -87,24 +87,27 @@ function QuestieEvent:Load()
         print(Questie:Colorize("[Questie]", "yellow"), "|cFF6ce314" .. l10n("The '%s' world event is active!", l10n(eventName)))
         activeEvents[eventName] = true
     end
-
+    
     for _, questData in pairs(QuestieEvent.eventQuests) do
         local eventName = questData[1]
         local questId = questData[2]
-
+        
         _QuestieEvent.eventNamesForQuests[questId] = eventName
-
+        
         if activeEvents[eventName] == true then
             QuestieCorrections.hiddenQuests[questId] = nil
             QuestieEvent.activeQuests[questId] = true
+        else
+            QuestieCorrections.hiddenQuests[questId] = true
+            QuestieEvent.activeQuests[questId] = nil
         end
     end
-
+    
     -- TODO: Also handle WotLK which has a different starting schedule
     if Questie.IsClassic then
         _LoadDarkmoonFaire()
     end
-
+    
     -- Clear the quests to save memory
     QuestieEvent.eventQuests = nil
 end

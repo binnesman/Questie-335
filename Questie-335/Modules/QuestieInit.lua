@@ -150,6 +150,9 @@ QuestieInit.Stages[1] = function() -- run as a coroutine
     Questie:Debug(Questie.DEBUG_CRITICAL, "[QuestieInit:Stage1] Starting QuestieOptions.Initialize Thread.")
     ThreadLib.ThreadSimple(QuestieOptions.Initialize, 0)
 
+    ToggleCalendar()
+    ToggleCalendar()
+
     MinimapIcon:Init()
 
     HBDHooks:Init()
