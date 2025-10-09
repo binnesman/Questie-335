@@ -67,63 +67,55 @@ _CreateContinentDropdown = function()
     dropdown:SetText(l10n('Select Your Continent'))
     dropdown:SetCallback("OnValueChanged", _HandleContinentSelection)
 
-    --local currentContinentId = QuestiePlayer:GetCurrentContinentId()
     local currentContinentId = GetCurrentMapContinent()
-    --Questie:Print("CurrentContinentId: "..currentContinentId)
 
-    -- This mapping translates the actual continent ID to the keys of l10n.continentLookup
-    --if currentContinentId == 0 then -- Eastern Kingdom
-        --selectedContinentId = 1
-    --elseif currentContinentId == 1 then -- Kalimdor
-        --selectedContinentId = 2
-    --elseif currentContinentId == 530 then -- Outland
-        --selectedContinentId = 3
-    --elseif currentContinentId == 571 then -- Northrend
-        --selectedContinentId = 4
-    --elseif l10n.zoneLookup[currentContinentId] then -- Dungeon
-    --elseif currentContinentId == 5 then
-        --selectedContinentId = 5
-    --end
     if currentContinentId > 0 then -- Kalimdor = 1, Eastern Kingdoms = 2, Outland = 3, Northrend = 4
         selectedContinentId = currentContinentId
     elseif currentContinentId == 0 then -- World map actively shows all of Azeroth, shouldn't be possible to reach here since we're calling SetMapToCurrentZone()
-        
+        Questie:Print("Please DM Netrinil about how you accomplished this")
     elseif currentContinentId == -1 then -- Dungeons, Raids, Battlegrounds, DK starting area, or cosmic map
-                
+        local _,instanceType = GetInstanceInfo()
+        if instanceType == "party" or "raid" then
+            selectedContinentId = 5
+        elseif instanceType == "pvp" then
+            selectedContinentId = 6
+        end
     end
-
-    --Questie:Print("zoneLookup: "..l10n.zoneLookup[currentContinentId])
-    --Questie:Print("SelectedContinentId: "..selectedContinentId)
 
     if _QuestieJourney.lastZoneSelection[1] then
         selectedContinentId = _QuestieJourney.lastZoneSelection[1]
     end
 
-    --Questie:Print("Setting continent to "..selectedContinentId)
     dropdown:SetValue(selectedContinentId)
     return dropdown
 end
 
+-- Overrides for ZoneIds
+local ZoneIdOverrides = {
+    [3562] = 3535, -- Hellfire Ramparts -> Hellfire Citadel
+    [3713] = 3535, -- The Blood Furnace -> Hellfire Citadel
+    [3714] = 3535, -- The Shattered Halls -> Hellfire Citadel
+    [3836] = 3535, -- Magtheridon's Lair -> Hellfire Citadel
+}
+
 _CreateZoneDropdown = function()
     local dropdown = AceGUI:Create("Dropdown")
 
-    --local currentZoneId = QuestiePlayer:GetCurrentZoneId()
     local currentZoneId = Custom_GetCurrentZone()
     if _QuestieJourney.lastZoneSelection[2] then
         currentZoneId = _QuestieJourney.lastZoneSelection[2]
     end
-
-    --Questie:Print("SelectedContinentId: "..selectedContinentId)
-    --Questie:Print("currentZoneId: "..currentZoneId)
+    --? Some areas have multiple areaIds, so we return the correct AreaId
+    if ZoneIdOverrides[currentZoneId] then
+        currentZoneId = ZoneIdOverrides[currentZoneId]
+    end
 
     local zones = QuestieJourney.zones[selectedContinentId]
     if currentZoneId and currentZoneId > 0 and zones then
-        --Questie:Print("currentZoneId is valid, zones is valid, and currentZoneId is greater than 0")
         local sortedZones = QuestieJourneyUtils:GetSortedZoneKeys(zones)
-        --for _,zoneI in pairs(zones) do
-            --Questie:Print("Zone "..zoneI)
-        --end
-        --Questie:Print("currentZone should be "..zones[selectedContinentId][currentZoneId])
+        if zones[currentZoneId] == nil then
+            currentZoneId = sortedZones[1]
+        end
         dropdown:SetList(zones, sortedZones)
         dropdown:SetValue(currentZoneId)
 

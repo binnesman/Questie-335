@@ -12,18 +12,6 @@ QuestieCompat.UiMapData =
         ["instance"] = -1,
         ["name"] = "Cosmic",
     },
-    [947] =
-	{
-		[1] = -3065.623046875,
-		[2] = 39654.2998046875,
-		[3] = 8723.9580078125,
-		[4] = 14824.525390625,
-		["mapType"] = 1,
-		["parentMapID"] = 0,
-		["mapID"] = 0,
-		["instance"] = 1,
-		["name"] = "Azeroth",
-	},
     [1411] =
 	{
 		[1] = 5287.4996337891,
@@ -167,18 +155,6 @@ QuestieCompat.UiMapData =
 		["mapID"] = 23,
 		["instance"] = 0,
 		["name"] = "Western Plaguelands",
-	},
-	[1423] =
-	{
-		[1] = 3870.8334960938,
-		[2] = 2581.2497558594,
-		[3] = -2185.4165039062,
-		[4] = 3799.9997558594,
-		["mapType"] = 3,
-		["parentMapID"] = 1415,
-		["mapID"] = 24,
-		["instance"] = 0,
-		["name"] = "Eastern Plaguelands",
 	},
 	[1424] =
 	{
@@ -528,18 +504,6 @@ QuestieCompat.UiMapData =
 		["instance"] = 1,
 		["name"] = "Winterspring",
 	},
-	[1453] =
-	{
-		[1] = 1344.2708053589,
-		[2] = 896.3544921875,
-		[3] = 1380.9714355469,
-		[4] = -8278.8505859375,
-		["mapType"] = 3,
-		["parentMapID"] = 1415,
-		["mapID"] = 302,
-		["instance"] = 0,
-		["name"] = "Stormwind City",
-	},
 	[1454] =
 	{
 		[1] = 1402.6044921874,
@@ -636,32 +600,7 @@ QuestieCompat.UiMapData =
 		["instance"] = 529,
 		["name"] = "Arathi Basin",
 	},
-}
-
-QuestieCompat.worldMapData = {
-    [0] = { 44688.53, 29795.11, 32601.04,  9894.93 },
-    [1] = { 44878.66, 29916.10,  8723.96, 14824.53 },
-}
-
-
-function QuestieCompat.LoadUiMapData(expansionLevel)
-    if (expansionLevel or QuestieCompat.WOW_PROJECT_ID) < QuestieCompat.WOW_PROJECT_BURNING_CRUSADE_CLASSIC then return end
-
-    local UiMapData =
-    {
-        [947] =
-        {
-            [1] = -31823.46875,
-            [2] = 45264.94287109375,
-            [3] = -5574.525390625,
-            [4] = 19216.29296875,
-            ["mapType"] = 1,
-            ["parentMapID"] = 946,
-            ["mapID"] = 0,
-            ["instance"] = 530,
-            ["name"] = "Azeroth",
-        },
-        [1941] =
+    [1941] =
         {
             [1] = 4925.0,
             [2] = 3283.3330078125,
@@ -865,20 +804,6 @@ function QuestieCompat.LoadUiMapData(expansionLevel)
             ["instance"] = 0,
             ["name"] = "Isle of Quel'Danas",
         },
-    }
-
-    for id, data in pairs(UiMapData) do
-        QuestieCompat.UiMapData[id] = data
-    end
-    UiMapData = nil
-
-    QuestieCompat.worldMapData[0] = { 44688.53, 29791.24, 32681.47, 11479.44 }
-    QuestieCompat.worldMapData[1] = { 44878.66, 29916.10,  8723.96, 14824.53 }
-
-    if (expansionLevel or QuestieCompat.WOW_PROJECT_ID) < QuestieCompat.WOW_PROJECT_WRATH_CLASSIC then return end
-
-    local UiMapData =
-    {
         [947] =
         {
             [1] = 31772.185855747,
@@ -1755,14 +1680,10 @@ function QuestieCompat.LoadUiMapData(expansionLevel)
             ["name"] = "The Ruby Sanctum",
             ["instance"] = 724,
         },
-    }
+}
 
-    for id, data in pairs(UiMapData) do
-        QuestieCompat.UiMapData[id] = data
-    end
-    UiMapData = nil
-
-    QuestieCompat.worldMapData[0] = { 48033.24, 32020.8, 36867.97, 14848.84 }
-    QuestieCompat.worldMapData[1] = { 47908.72, 31935.28, 8552.61, 18467.83 }
-    QuestieCompat.worldMapData[571] = { 47662.7, 31772.19, 25198.53, 11072.07 }
-end
+QuestieCompat.worldMapData = {
+    [0] = { 48033.24, 32020.8, 36867.97, 14848.84 },
+    [1] = { 47908.72, 31935.28, 8552.61, 18467.83 },
+    [571] = { 47662.7, 31772.19, 25198.53, 11072.07 },
+}
