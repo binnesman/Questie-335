@@ -75,6 +75,9 @@ if Questie.IsWotlk or QuestieCompat.Is335 then
     trackedAchievementIds = {}
 end
 
+local trackedPerks = {}
+local trackedPerkIds = {}
+
 local isFirstRun = true
 local allowFormattingUpdate = false
 local trackerBaseFrame, trackerHeaderFrame, trackerQuestFrame
@@ -110,6 +113,9 @@ function QuestieTracker.Initialize()
     end
     if (not Questie.db.char.trackedAchievementIds) then
         Questie.db.char.trackedAchievementIds = {}
+    end
+    if (not Questie.db.char.trackedPerkIds) then
+        Questie.db.char.trackedPerkIds = {}
     end
     if (not Questie.db.profile.TrackerWidth) then
         Questie.db.profile.TrackerWidth = 0
@@ -264,6 +270,23 @@ function QuestieTracker.Initialize()
             trackerBaseFrame:Hide()
         end)
     end)
+end
+
+function QuestieTracker:GetActivePerks()
+    local tempPerks = {}
+
+    for perkId, perk in pairs(PerkMgrPerks) do
+        if perkId then 
+            -- if active and not misc perk
+            if GetPerkActive(perkId) == true and perk["cat"] ~= 19 and PerkMgrTaskAll[GetPerkTaskAssign2(GetPerkTaskAssign1(perkId))] then
+                trackedPerkIds[perkId] = true
+                tempPerks[perkId] = perk
+            else
+                Questie.db.char.trackedPerkIds[perkId] = nil
+            end
+        end
+    end
+    return tempPerks
 end
 
 function QuestieTracker:ResetLocation()
@@ -489,6 +512,11 @@ function QuestieTracker:HasQuest()
                 hasQuest = true
             end
         else
+            hasQuest = true
+        end
+    end
+    if Questie.db.profile.listPerks then
+        if #Questie.db.char.trackedPerkIds ~= 0 then
             hasQuest = true
         end
     end
@@ -1632,11 +1660,366 @@ function QuestieTracker:Update()
         end
     end
 
+    -- Begin populating the tracker with perks
+    local _UpdatePerks = function()
+        if (not Questie.db.profile.listPerks) then return end
+
+                        
+        trackedPerks = QuestieTracker:GetActivePerks()
+
+        -- if there's at least 1 tracked perk
+        if #trackedPerks > 0 then
+            local tempPerks = trackedPerks
+            -- wipe any old data
+            Questie.db.char.trackedPerkIds = {}
+
+            -- Add perk to the tracker.
+            for perkId in pairs(tempPerks) do
+                if perkId then
+                    Questie.db.char.trackedPerkIds[perkId] = true
+                end
+            end
+        end
+        WatchFrame_Update()
+
+        -- Sync and populate QuestieTrackers perk cache
+                -- If global trackedPerkIds doesn't match local trackedPerkIds
+                if Questie.db.char.trackedPerkIds ~= trackedPerkIds then
+                    trackedPerkIds = {}
+                    -- iterate through global trackedPerkIds
+                    for perkId in pairs(Questie.db.char.trackedPerkIds) do
+                        -- if true
+                        if Questie.db.char.trackedPerkIds[perkId] == true then
+                            -- set local trackedPerkId to true
+                            trackedPerkIds[perkId] = true
+                        end
+                    end
+                end
+
+        -- Begin populating the tracker with tracked perks
+        -- For all intents and purposes at a code level we're going to treat each tracked perk the same way we treat and add Quests. This loop is
+        -- necessary to keep separate from the above tracked Quests loop so we can place all tracked Perks into it's own "Zone" called Perks.
+        local firstPerkInZone = false
+        local perkId, perkName, perkDesc, perkComplete, perkCriteria, perkLevels, perkUnlock, zoneName, perk
+
+        for trackedId, _ in pairs(trackedPerkIds) do
+            perkId = PerkMgrPerks[trackedId]["id"]
+            perkDesc = PerkMgrPerks[trackedId]["desc"]
+            perkName = PerkMgrPerks[trackedId]["name"]
+            --_, perkId, perkLevels, perkUnlock, perkDesc, _, _, perkName, _, _, _, _, _ = PerkMgrPerks[trackedId]
+            --perkCriteria = 
+            zoneName = "Perks"
+
+            perk = {
+                    Id = perkId,
+                    Name = perkName,
+                    Description = perkDesc
+            }
+
+            if perkId and trackedPerkIds[perkId] == true then
+                -- Add Perk Zone
+                if zoneCheck ~= zoneName then
+                    firstPerkInZone = true
+                end
+
+                if firstPerkInZone then
+                    -- Get first line in linePool
+                    line = TrackerLinePool.GetNextLine()
+
+                    -- Safety check - make sure we didn't run over our linePool limit.
+                    if not line then break end
+
+                    -- Set Line Mode, Types, Clickers
+                        line:SetMode("zone")
+                        line:SetZone(zoneName)
+                        line.expandQuest:Hide()
+                        line.criteriaMark:Hide()
+                        line.playButton:Hide()
+
+                        -- Setup Zone Label
+                        line.label:ClearAllPoints()
+                        line.label:SetPoint("TOPLEFT", line, "TOPLEFT", 0, 0)
+
+                        -- Set Zone Title and Min/Max states
+                        if Questie.db.char.collapsedZones[zoneName] then
+                            line.expandZone:SetMode(0)
+                            local text = zoneName == "Perks" and l10n("Perks") or zoneName
+                            line.label:SetText("|cFFC0C0C0" .. text .. " +|r")
+                        else
+                            line.expandZone:SetMode(1)
+                            local text = zoneName == "Perks" and l10n("Perks") or zoneName
+                            line.label:SetText("|cFFC0C0C0" .. text .. "|r")
+                        end
+
+                        -- Checks the minAllQuestsInZone[zone] table and if empty, zero out the table.
+                        if Questie.db.char.minAllQuestsInZone[zoneName] ~= nil and not Questie.db.char.minAllQuestsInZone[zoneName].isTrue and not Questie.db.char.collapsedZones[zoneName] then
+                            local minQuestIdCount = 0
+                            for minQuestId, _ in pairs(Questie.db.char.minAllQuestsInZone[zoneName]) do
+                                if type(minQuestId) == "number" then
+                                    minQuestIdCount = minQuestIdCount + 1
+                                end
+                            end
+
+                            if minQuestIdCount == 0 then
+                                Questie.db.char.minAllQuestsInZone[zoneName] = nil
+                            end
+                        end
+
+                        -- Check and measure Zone Label text width and update tracker width
+                        QuestieTracker:UpdateWidth(line.label:GetUnboundedStringWidth() + trackerMarginLeft + trackerMarginRight)
+
+                        -- Set Zone Label and Line widths
+                        line.label:SetWidth(trackerBaseFrame:GetWidth() - trackerMarginLeft - trackerMarginRight)
+                        line:SetWidth(line.label:GetWidth())
+
+                        -- Compare largest text Label in the tracker with current Label, then save widest width
+                        trackerLineWidth = math.max(trackerLineWidth, line.label:GetUnboundedStringWidth() + trackerMarginLeft)
+
+                        -- Setup Min/Max Button
+                        line.expandZone:ClearAllPoints()
+                        line.expandZone:SetPoint("TOPLEFT", line.label, "TOPLEFT", 0, 0)
+                        line.expandZone:SetWidth(line.label:GetWidth())
+                        line.expandZone:SetHeight(line.label:GetHeight())
+                        line.expandZone:Show()
+
+                        -- Adds 4 pixels between Zone and first Achievement Title
+                        line:SetHeight(line.label:GetHeight() + 4)
+
+                        -- Set Zone states
+                        line:Show()
+                        line.label:Show()
+                        line.Quest = nil
+                        line.Objective = nil
+                        firstPerkInZone = false
+                        zoneCheck = zoneName
+                end
+
+                -- Add Perks
+                    if (not Questie.db.char.collapsedZones[zoneName]) then
+                        local pta1 = GetPerkTaskAssign1(perk.Id)
+                        local pta2 = GetPerkTaskAssign2(pta1)
+                        local task = PerkMgrTaskAll[pta2]
+
+                        if task then
+                        -- Get next line in linePool
+                        line = TrackerLinePool.GetNextLine()
+
+                        -- Safety check - make sure we didn't run over our linePool limit.
+                        if not line then break end
+
+                        -- Set Line Mode, Types, Clickers
+                        line:SetMode("perk")
+                        line:SetOnClick("perk")
+                        line:SetQuest(perk)
+                        line:SetObjective(nil)
+                        line.expandZone:Hide()
+                        line.criteriaMark:Hide()
+                        line.playButton:Hide()
+
+                        -- Set Min/Max Button and default states
+                        line.expandQuest:Show()
+                        line.expandQuest:SetPoint("TOPRIGHT", line, "TOPLEFT", questMarginLeft - 8, 1)
+                        line.expandQuest.zoneId = zoneName
+
+                        -- The minAllQuestsInZone table is always blank until a player Shift+Clicks the Zone header (MouseDown).
+                        -- QuestieTracker:Update is triggered and the table is then filled with all Perk ID's in the same Zone.
+                        if Questie.db.char.minAllQuestsInZone[zoneName] ~= nil and Questie.db.char.minAllQuestsInZone[zoneName].isTrue then
+                            Questie.db.char.minAllQuestsInZone[zoneName][perk.Id] = true
+                        end
+
+                        -- Handles all the Min/Max behavior individually for each Perk.
+                        if Questie.db.char.collapsedQuests[perk.Id] then
+                            line.expandQuest:SetMode(0)
+                        else
+                            line.expandQuest:SetMode(1)
+                        end
+
+                        -- Setup Perk Label
+                        line.label:ClearAllPoints()
+                        line.label:SetPoint("TOPLEFT", line, "TOPLEFT", questMarginLeft, 0)
+
+                        -- Set Perk Title
+                        if Questie.db.profile.enableTooltipsQuestID then
+                            line.label:SetText("|cFFFFFF00" .. perk.Name .. " (" .. perk.Id .. ")|r")
+                        else
+                            line.label:SetText("|cFFFFFF00" .. perk.Name .. "|r")
+                        end
+
+                        -- Check and measure Perk Label text width and update tracker width
+                        QuestieTracker:UpdateWidth(line.label:GetUnboundedStringWidth() + questMarginLeft + trackerMarginRight)
+
+                        -- Set Perk Label and Line widths
+                        line.label:SetWidth(trackerBaseFrame:GetWidth() - questMarginLeft - trackerMarginRight)
+                        line:SetWidth(line.label:GetWidth() + questMarginLeft)
+
+                        -- Compare largest text Label in the tracker with current Label, then save widest width
+                        trackerLineWidth = math.max(trackerLineWidth, line.label:GetUnboundedStringWidth() + questMarginLeft)
+
+                        -- Adds 4 pixels between Perk Title and first Objective
+                        line:SetHeight(line.label:GetHeight() + 4)
+
+                        -- Set Perk states
+                        line:Show()
+                        line.label:Show()
+
+                        -- Add Perk Objective
+                        if (not Questie.db.char.collapsedQuests[perk.Id]) then
+                            
+                                local taskReq1 = task["req1"]
+                                local taskReq0 = task["req0"]
+                                local taskHeader = task["header"]
+                                local taskFlags = task["flags"]
+                                local taskId = task["id"]
+                                local taskText = task["text"]
+                                local taskReq3 = task["req3"]
+                                local taskReq2 = task["req2"]
+                                --local quantityProgress = GetPerkTaskProg(pta1)
+                                --local quantityNeeded
+
+                                -- Get next line in linePool
+                                line = TrackerLinePool.GetNextLine()
+
+                                -- Safety check - make sure we didn't run over our linePool limit.
+                                if not line then break end
+
+                                -- Set Line Mode, Types, Clickers
+                                line:SetMode("objective")
+                                line:SetOnClick("perk")
+
+                                line:SetQuest(perk)
+                                line:SetObjective("objective")
+                                line.expandZone:Hide()
+                                line.expandQuest:Hide()
+                                line.criteriaMark:Hide()
+                                line.playButton:Hide()
+
+                                -- Setup Objective Label
+                                line.label:ClearAllPoints()
+                                line.label:SetPoint("TOPLEFT", line, "TOPLEFT", objectiveMarginLeft, 0)
+
+                                if (string.sub(taskText,1,1) == "#") then
+                                    local num = tonumber(string.sub(taskText,2))
+                                    taskText = PerkMgrTaskAll[num]["text"]
+                                end
+
+                                local formattedText = taskText
+                                -- Replace placeholder strings with appropriate values and formatting.
+                                :gsub('$0s', "s")
+                                :gsub('$1s', "s")
+                                :gsub('$2s', "s")
+                                :gsub('$3s', "s")
+                                :gsub('$0d', '|cffC63935' .. tostring(taskReq0 or "") .. '|r')
+                                :gsub('$0D', '|cffC63935' .. tostring(taskReq0 or "") .. '|r')
+                                :gsub('$1d', '|cffC63935' .. tostring(taskReq1 or "") .. '|r')
+                                :gsub('$1D', '|cffC63935' .. tostring(taskReq1 or "") .. '|r')
+                                :gsub('$2d', '|cffC63935' .. tostring(taskReq2 or "") .. '|r')
+                                :gsub('$2D', '|cffC63935' .. tostring(taskReq2 or "") .. '|r')
+                                :gsub('$3d', '|cffC63935' .. tostring(taskReq3 or "") .. '|r')
+                                :gsub('$3D', '|cffC63935' .. tostring(taskReq3 or "") .. '|r')
+                                :gsub('$n', '\n\n')
+                                :gsub('$c', '|cffC63935')
+                                :gsub('$C', '|r')
+
+                                -- Set Objective text
+                                line.label:SetText(formattedText)
+
+                                 -- Check and measure Objective text width and update tracker width
+                                 QuestieTracker:UpdateWidth(line.label:GetUnboundedStringWidth() + objectiveMarginLeft + trackerMarginRight)
+
+                                -- Set Label width
+                                line.label:SetWidth(trackerBaseFrame:GetWidth() - objectiveMarginLeft - trackerMarginRight)
+
+                                --[[
+                                    -- Split Objective description and Progress/Needed into seperate lines
+                                    if (trackerLineWidth < line.label:GetUnboundedStringWidth() + objectiveMarginLeft) and (line.label:GetWidth() < line.label:GetUnboundedStringWidth() + 5) then
+                                        -- Set Objective text
+                                        line.label:SetText(QuestieLib:GetRGBForObjective({ Collected = quantityProgress, Needed = quantityNeeded }) .. objDesc .. ": ")
+
+                                        -- Check and measure Objective text width and update tracker width
+                                        QuestieTracker:UpdateWidth(line.label:GetUnboundedStringWidth() + objectiveMarginLeft + trackerMarginRight)
+
+                                        -- Set Label and Line widths
+                                        line.label:SetWidth(trackerBaseFrame:GetWidth() - objectiveMarginLeft - trackerMarginRight)
+                                        line:SetWidth(line.label:GetWidth() + objectiveMarginLeft)
+
+                                        -- Compare largest text Label in the tracker with current Label, then save widest width
+                                            trackerLineWidth = math.max(trackerLineWidth, line.label:GetUnboundedStringWidth() + objectiveMarginLeft)
+
+                                            -- Adds 1 pixel between split Objectives
+                                            line:SetHeight(line.label:GetHeight() + 1)
+
+                                            -- Set Objective state
+                                            line:Show()
+                                    line.label:Show()
+
+                                    -- Get next line in linePool
+                                    line = TrackerLinePool.GetNextLine()
+
+                                    -- Safety check - make sure we didn't run over our linePool limit.
+                                    if not line then break end
+
+                                    -- Set Line Mode, Types, Clickers
+                                    line:SetMode("objective")
+                                    line:SetOnClick("achieve")
+                                    line:SetQuest(objId)
+                                    line:SetObjective("objective")
+                                    line.expandZone:Hide()
+                                    line.expandQuest:Hide()
+                                    line.criteriaMark:Hide()
+                                    line.playButton:Hide()
+                                        
+                                    -- Set Objective Label
+                                    line.label:ClearAllPoints()
+                                    line.label:SetPoint("TOPLEFT", line, "TOPLEFT", objectiveMarginLeft, 0)
+
+                                    -- Set Objective text
+                                    line.label:SetText(QuestieLib:GetRGBForObjective({ Collected = quantityProgress, Needed = quantityNeeded }) .. "    > " .. lineEnding)
+
+                                    -- Check and measure Objective text width and update tracker width
+                                    QuestieTracker:UpdateWidth(line.label:GetUnboundedStringWidth() + objectiveMarginLeft + trackerMarginRight)
+                                        
+                                    -- Set Label and Line widths
+                                    line.label:SetWidth(trackerBaseFrame:GetWidth() - objectiveMarginLeft - trackerMarginRight)
+                                    line:SetWidth(line.label:GetWidth() + objectiveMarginLeft)
+                                else
+                                    -- Set Line widths
+                                    line:SetWidth(line.label:GetWidth() + objectiveMarginLeft)
+
+                                    -- Compare largest text Label in the tracker with current Label, then save widest width
+                                        trackerLineWidth = math.max(trackerLineWidth, line.label:GetUnboundedStringWidth() + objectiveMarginLeft)
+                                    end
+                                --]]
+
+                                -- Adds 1 pixel between multiple Objectives
+                                line:SetHeight(line.label:GetHeight() + 1)
+
+                                -- Set Objective state
+                                line:Show()
+                                line.label:Show()
+                            end
+                        end
+
+                        -- Safety check in case we hit the linePool limit
+                        if not line then
+                            line = TrackerLinePool.GetLastLine()
+                        end
+
+                        -- Adds 2 pixels and "Padding Between Quests" setting in Tracker Options
+                        line:SetHeight(line.label:GetHeight() + (Questie.db.profile.trackerQuestPadding + 2))
+                    end
+            end
+        end
+    end
+
+    
+
     -- Populate Achievements first then Quests
     if Questie.db.profile.listAchievementsFirst and (Questie.IsWotlk or QuestieCompat.Is335) then
         _UpdateAchievements()
+        _UpdatePerks()
         _UpdateQuests()
     else
+        _UpdatePerks()
         _UpdateQuests()
         _UpdateAchievements()
     end

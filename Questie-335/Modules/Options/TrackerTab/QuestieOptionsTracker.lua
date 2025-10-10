@@ -73,13 +73,7 @@ function QuestieOptions.tabs.tracker:Initialize()
                 order = 6,
                 inline = true,
                 width = 0.5,
-                name = function()
-                    if Questie.IsWotlk then
-                        return l10n("Quest and Achievement Options")
-                    else
-                        return l10n('Quest Options')
-                    end
-                end,
+                name = function() return l10n("Quest, Achievement and Perk Options") end,
                 disabled = function() return not Questie.db.profile.trackerEnabled end,
                 args = {
                     autoTrackQuests = {
@@ -154,7 +148,21 @@ function QuestieOptions.tabs.tracker:Initialize()
                             QuestieTracker:Update()
                         end
                     },
-                    Spacer_Dropdowns = QuestieOptionsUtils:Spacer(5),
+                    listPerks = {
+                        type = "toggle",
+                        order = 5,
+                        width = 1.5,
+                        name = function() return l10n("List Perks") end,
+                        desc = function() return l10n("When this is checked, the Questie Tracker will list active Perk unlock/upgrade requirements. These will be listed before quests.") end,
+                        disabled = function() return not Questie.db.profile.trackerEnabled end,
+                        hidden = function() return not (Questie.IsWotlk or QuestieCompat.Is335) end,
+                        get = function() return Questie.db.profile.listPerks end,
+                        set = function(_, value)
+                            Questie.db.profile.listPerks = value
+                            QuestieTracker:Update()
+                        end
+                    },
+                    Spacer_Dropdowns = QuestieOptionsUtils:Spacer(5.1),
                     openQuestLog = {
                         type = "select",
                         order = 7,
@@ -367,7 +375,7 @@ function QuestieOptions.tabs.tracker:Initialize()
             },
             group_tracker = {
                 type = "group",
-                order = 7,
+                order = 8,
                 inline = true,
                 width = 0.5,
                 name = function() return l10n('Tracker Window Options'); end,
@@ -768,7 +776,7 @@ function QuestieOptions.tabs.tracker:Initialize()
             },
             group_fonts = {
                 type = "group",
-                order = 8,
+                order = 9,
                 inline = true,
                 width = 0.5,
                 name = function() return l10n('Font Options'); end,
