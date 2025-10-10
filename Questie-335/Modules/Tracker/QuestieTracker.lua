@@ -282,7 +282,7 @@ function QuestieTracker:GetActivePerks()
                 trackedPerkIds[perkId] = true
                 tempPerks[perkId] = perk
             else
-                Questie.db.char.trackedPerkIds[perkId] = nil
+                --Questie.db.char.trackedPerkIds[perkId] = nil
             end
         end
     end
@@ -1664,11 +1664,10 @@ function QuestieTracker:Update()
     local _UpdatePerks = function()
         if (not Questie.db.profile.listPerks) then return end
 
-                        
         trackedPerks = QuestieTracker:GetActivePerks()
 
         -- if there's at least 1 tracked perk
-        if #trackedPerks > 0 then
+        if trackedPerks ~= {} then
             local tempPerks = trackedPerks
             -- wipe any old data
             Questie.db.char.trackedPerkIds = {}
