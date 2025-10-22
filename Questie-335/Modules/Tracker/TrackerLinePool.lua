@@ -1102,7 +1102,7 @@ TrackerLinePool.SetMode = function(self, mode)
             local trackerFontSizeZone = Questie.db.profile.trackerFontSizeZone
             self.label:SetFont(LSM30:Fetch("font", Questie.db.profile.trackerFontZone), trackerFontSizeZone, Questie.db.profile.trackerFontOutline)
             self.label:SetHeight(trackerFontSizeZone)
-        elseif mode == "quest" or mode == "achieve" then
+        elseif mode == "quest" or mode == "achieve" or mode == "perk" then
             local trackerFontSizeQuest = Questie.db.profile.trackerFontSizeQuest
             self.label:SetFont(LSM30:Fetch("font", Questie.db.profile.trackerFontQuest), trackerFontSizeQuest, Questie.db.profile.trackerFontOutline)
             self.label:SetHeight(trackerFontSizeQuest)
