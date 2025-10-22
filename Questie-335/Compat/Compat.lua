@@ -598,9 +598,18 @@ function QuestieCompat.GetQuestsCompleted()
 end
 
 -- Fires when the data requested by QueryQuestsCompleted() is available.
+local lastCompleteQuery = 0
 -- https://wowpedia.fandom.com/wiki/QUEST_QUERY_COMPLETE
 function QuestieCompat:QUEST_QUERY_COMPLETE(event)
-    print(Questie:Colorize("[Questie] Getting Completed Quests", "yellow"))
+    -- Prevents calling the query too often
+    local now = GetTime()
+    if (now - lastCompleteQuery) < 60.0 then -- at least 1 minute
+        return
+    end
+
+    lastCompleteQuery = now
+
+    print(Questie:Colorize("[Questie] Getting Completed Quests from query", "yellow"))
     QuestieCompat.Merge(Questie.db.char.complete, GetQuestsCompleted(), true)
 
     for questId in pairs(Questie.db.char.complete) do
@@ -624,7 +633,7 @@ function QuestieCompat:QUEST_QUERY_COMPLETE(event)
 end
 
 function QuestieCompat:ForceGetCompletedQuests()
-    print(Questie:Colorize("[Questie] Getting Completed Quests", "yellow"))
+    print(Questie:Colorize("[Questie] Getting Completed Quests by force", "yellow"))
     QuestieCompat.Merge(Questie.db.char.complete, GetQuestsCompleted(), true)
 
     for questId in pairs(Questie.db.char.complete) do
