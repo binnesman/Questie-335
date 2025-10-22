@@ -1008,6 +1008,47 @@ function TrackerUtils:GetSortedQuestIds()
     return sortedQuestIds, questDetails
 end
 
+---@return table sortedPerks Table with sorted perks (WIP by Sort Type)
+---@return table questDetails Table with processed perk data
+function TrackerUtils:GetSortedPerkIds(activePerks)
+    local sortedPerkIds = {}
+    local perkDetails = {}
+    local sortObj = "byZoneAscending" -- WIP until options are set up
+    -- byZoneAscending should list the easiest content first
+    --local sortObj = Questie.db.profile.trackerSortPerks
+    for perkId, _ in pairs(activePerks) do
+        local perk = PerkMgrPerks[perkId]
+
+        if perk then
+            -- Insert Perk Ids into sortedPerkIds table
+            tinsert(sortedPerkIds, perkId)
+
+            -- Create perkDetails table keys and insert values
+            perkDetails[perk["id"]] = {}
+            perkDetails[perk["id"]].perk = perk
+
+            local taskId = GetPerkTaskAssign2(GetPerkTaskAssign1(perk["id"]))
+            perkDetails[perk["id"]].taskId = taskId
+            perkDetails[perk["id"]].headerId = PerkMgrTaskAll[taskId]["header"]
+        end
+    end
+
+    if sortObj == "byPerkName" or sortObj == "byPerkNameReversed" then
+
+    elseif sortObj == "byZoneAscending" or sortObj == "byZoneDescending" then
+        table.sort(sortedPerkIds, function(a, b)
+            local pA = perkDetails[a].headerId
+            local pB = perkDetails[b].headerId
+            if sortObj == "byZoneAscending" then
+                return pA and pB and pA < pB
+            else
+                return pA and pB and pA > pB
+            end
+        end)
+    end
+    return sortedPerkIds, perkDetails
+end
+
 function TrackerUtils:IsVoiceOverLoaded()
     if (IsAddOnLoaded("AI_VoiceOver") and IsAddOnLoaded("AI_VoiceOverData_Vanilla")) then
         return true

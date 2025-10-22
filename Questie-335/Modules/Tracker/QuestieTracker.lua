@@ -1682,18 +1682,18 @@ function QuestieTracker:Update()
         WatchFrame_Update()
 
         -- Sync and populate QuestieTrackers perk cache
-                -- If global trackedPerkIds doesn't match local trackedPerkIds
-                if Questie.db.char.trackedPerkIds ~= trackedPerkIds then
-                    trackedPerkIds = {}
-                    -- iterate through global trackedPerkIds
-                    for perkId in pairs(Questie.db.char.trackedPerkIds) do
-                        -- if true
-                        if Questie.db.char.trackedPerkIds[perkId] == true then
-                            -- set local trackedPerkId to true
-                            trackedPerkIds[perkId] = true
-                        end
-                    end
+        -- If global trackedPerkIds doesn't match local trackedPerkIds
+        if Questie.db.char.trackedPerkIds ~= trackedPerkIds then
+            trackedPerkIds = {}
+            -- iterate through global trackedPerkIds
+            for perkId in pairs(Questie.db.char.trackedPerkIds) do
+                -- if true
+                if Questie.db.char.trackedPerkIds[perkId] == true then
+                    -- set local trackedPerkId to true
+                    trackedPerkIds[perkId] = true
                 end
+            end
+        end
 
         -- Begin populating the tracker with tracked perks
         -- For all intents and purposes at a code level we're going to treat each tracked perk the same way we treat and add Quests. This loop is
@@ -1701,19 +1701,34 @@ function QuestieTracker:Update()
         local firstPerkInZone = false
         local perkId, perkName, perkDesc, perkComplete, perkCriteria, perkLevels, perkUnlock, zoneName, perk
 
-        for trackedId, _ in pairs(trackedPerkIds) do
-            perkId = PerkMgrPerks[trackedId]["id"]
-            perkDesc = PerkMgrPerks[trackedId]["desc"]
-            perkName = PerkMgrPerks[trackedId]["name"]
+        local sortedPerkIds, perkDetails = TrackerUtils:GetSortedPerkIds(trackedPerkIds)
+        for sortedPerkIndex, sortedPerkId in pairs(sortedPerkIds) do
+            perkId = perkDetails[sortedPerkId].perk["id"]
+            perkDesc = perkDetails[sortedPerkId].perk["desc"]
+            perkName = perkDetails[sortedPerkId].perk["name"]
             --_, perkId, perkLevels, perkUnlock, perkDesc, _, _, perkName, _, _, _, _, _ = PerkMgrPerks[trackedId]
             --perkCriteria = 
-            zoneName = "Perks"
-
+            
             perk = {
-                    Id = perkId,
-                    Name = perkName,
-                    Description = perkDesc
+                Id = perkId,
+                Name = perkName,
+                Description = perkDesc
             }
+            
+            local pta1 = GetPerkTaskAssign1(perk.Id)
+            local pta2 = GetPerkTaskAssign2(pta1)
+            local task = PerkMgrTaskAll[pta2]
+            
+            local taskReq1 = task["req1"]
+            local taskReq0 = task["req0"]
+            local taskHeader = task["header"]
+            local taskFlags = task["flags"]
+            local taskId = task["id"]
+            local taskText = task["text"]
+            local taskReq3 = task["req3"]
+            local taskReq2 = task["req2"]
+            
+            zoneName = PerkMgrTaskHeader[taskHeader]["text"]
 
             if perkId and trackedPerkIds[perkId] == true then
                 -- Add Perk Zone
@@ -1781,7 +1796,7 @@ function QuestieTracker:Update()
                         line.expandZone:SetHeight(line.label:GetHeight())
                         line.expandZone:Show()
 
-                        -- Adds 4 pixels between Zone and first Achievement Title
+                        -- Adds 4 pixels between Zone and first Perk Title
                         line:SetHeight(line.label:GetHeight() + 4)
 
                         -- Set Zone states
@@ -1795,9 +1810,6 @@ function QuestieTracker:Update()
 
                 -- Add Perks
                     if (not Questie.db.char.collapsedZones[zoneName]) then
-                        local pta1 = GetPerkTaskAssign1(perk.Id)
-                        local pta2 = GetPerkTaskAssign2(pta1)
-                        local task = PerkMgrTaskAll[pta2]
 
                         if task then
                         -- Get next line in linePool
@@ -1864,14 +1876,6 @@ function QuestieTracker:Update()
                         -- Add Perk Objective
                         if (not Questie.db.char.collapsedQuests[perk.Id]) then
                             
-                                local taskReq1 = task["req1"]
-                                local taskReq0 = task["req0"]
-                                local taskHeader = task["header"]
-                                local taskFlags = task["flags"]
-                                local taskId = task["id"]
-                                local taskText = task["text"]
-                                local taskReq3 = task["req3"]
-                                local taskReq2 = task["req2"]
                                 --local quantityProgress = GetPerkTaskProg(pta1)
                                 --local quantityNeeded
 
@@ -1922,11 +1926,35 @@ function QuestieTracker:Update()
                                 -- Set Objective text
                                 line.label:SetText(formattedText)
 
-                                 -- Check and measure Objective text width and update tracker width
-                                 QuestieTracker:UpdateWidth(line.label:GetUnboundedStringWidth() + objectiveMarginLeft + trackerMarginRight)
+                                -- Check and measure Objective text width and update tracker width
+                                --QuestieTracker:UpdateWidth(line.label:GetUnboundedStringWidth() + objectiveMarginLeft + trackerMarginRight)
 
                                 -- Set Label width
-                                line.label:SetWidth(trackerBaseFrame:GetWidth() - objectiveMarginLeft - trackerMarginRight)
+                                --line.label:SetWidth(trackerBaseFrame:GetWidth() - objectiveMarginLeft - trackerMarginRight)
+
+                                -- If the line width is less than the minimum Tracker width then don't wrap text
+                                if line.label:GetUnboundedStringWidth() + objectiveMarginLeft < trackerMinLineWidth then
+                                    -- Check and measure Objective text width and update tracker width
+                                    QuestieTracker:UpdateWidth(line.label:GetUnboundedStringWidth() + objectiveMarginLeft + trackerMarginRight)
+
+                                    -- Set Objective Label and Line widths
+                                    line.label:SetWidth(trackerBaseFrame:GetWidth() - objectiveMarginLeft - trackerMarginRight)
+                                    line:SetWidth(line.label:GetWidth() + objectiveMarginLeft)
+
+                                    -- Compare largest text Label in the tracker with current Label, then save widest width
+                                    trackerLineWidth = math.max(trackerLineWidth, line.label:GetUnboundedStringWidth() + objectiveMarginLeft)
+                                else
+                                    -- Set Label and Line widths
+                                    line.label:SetWidth(trackerBaseFrame:GetWidth() - objectiveMarginLeft - trackerMarginRight)
+                                    line:SetWidth(line.label:GetWrappedWidth() + objectiveMarginLeft)
+
+                                    -- TextWrap Objective and set height
+                                    line.label:SetHeight(line.label:GetStringHeight() * line.label:GetNumLines())
+                                    line:SetHeight(line.label:GetHeight())
+
+                                    -- Compare trackerLineWidth, trackerMinLineWidth and the current label, then save the widest width
+                                    trackerLineWidth = math.max(trackerLineWidth, trackerMinLineWidth, line.label:GetWrappedWidth() + objectiveMarginLeft)
+                                end
 
                                 --[[
                                     -- Split Objective description and Progress/Needed into seperate lines
