@@ -1706,6 +1706,7 @@ function QuestieTracker:Update()
             perkId = perkDetails[sortedPerkId].perk["id"]
             perkDesc = perkDetails[sortedPerkId].perk["desc"]
             perkName = perkDetails[sortedPerkId].perk["name"]
+            perkUnlock = perkDetails[sortedPerkId].perk["unlock"]
             --_, perkId, perkLevels, perkUnlock, perkDesc, _, _, perkName, _, _, _, _, _ = PerkMgrPerks[trackedId]
             --perkCriteria = 
             
@@ -1728,7 +1729,11 @@ function QuestieTracker:Update()
             local taskReq3 = task["req3"]
             local taskReq2 = task["req2"]
             
-            zoneName = PerkMgrTaskHeader[taskHeader]["text"]
+            if perkUnlock ~= taskId then
+                zoneName = PerkMgrTaskHeader[taskHeader]["text"]
+            else
+                zoneName = "Unlock"
+            end
 
             if perkId and trackedPerkIds[perkId] == true then
                 -- Add Perk Zone
