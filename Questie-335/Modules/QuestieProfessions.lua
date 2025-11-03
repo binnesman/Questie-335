@@ -61,8 +61,6 @@ function QuestieProfessions:Update()
     local temporaryPlayerProfessions = {}
 
     for i=1, GetNumSkillLines() do
-        if i > 14 then break; end -- We don't have to go through all the weapon skills
-
         local skillName, isHeader, _, skillRank, _, _, _, _, _, _, _, _, _ = GetSkillLineInfo(i)
         if (not isHeader) and professionTable[skillName] then
             temporaryPlayerProfessions[professionTable[skillName]] = {skillName, skillRank}
